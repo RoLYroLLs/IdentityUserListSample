@@ -19,20 +19,10 @@ namespace IdentityUserListSample.Controllers
         // GET: Users
         public async Task<ActionResult> Index()
         {
-        	var allUsers = (await db.Users.ToListAsync());
+        	var allUsers = await db.Users.ToListAsync();
+			var allRoles = await db.Roles.ToListAsync();
 
-			/**
-			 * returns error: 
-			 * Unable to create a constant value of type 'Microsoft.AspNet.Identity.EntityFramework.IdentityUserRole'. Only primitive types or enumeration types are supported in this context.
-			 * 
-			 */
-			var users = allUsers.Select(u => new UsersViewModel {Id = u.Id, UserName = u.UserName, Roles = String.Join(", ", db.Roles.Where(userRole => u.Roles.Select(r => r.RoleId).Contains(userRole.Id)).Select(userRole => userRole.Name))}).ToList();
-
-			/**
-			 * works and at least returns the RoleId
-			 * 
-			 */
-			//var users = allUsers.Select(u => new UsersViewModel {Id = u.Id, UserName = u.UserName, Roles = String.Join(", ", u.Roles.Select(r => r.RoleId))}).ToList();
+	        var users = allUsers.Select(u => new UsersViewModel {Id = u.Id, UserName = u.UserName, Roles = String.Join(", ", allRoles.Where(role => role.Users.Any(user => user.UserId == u.Id)).Select(r => r.Name))}).ToList();
 			
 			return View(users);
 		}
